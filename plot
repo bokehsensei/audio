@@ -4,4 +4,5 @@ if [ -z $1 ]; then
 else
     number_of_samples=$1
 fi
+echo "# of samples: $number_of_samples"
 gnuplot -e "plot '/tmp/microphone' binary format=\"%float%float\" array=$number_of_samples using 1 with lines"

@@ -25,7 +25,6 @@
 
 #define NUM_CHUNKS          ( (NUM_SECONDS*SAMPLE_RATE/FRAMES_PER_BUFFER) + 1)
 #define CHUNK_SIZE          FRAMES_PER_BUFFER*NUM_CHANNELS*sizeof(SAMPLE)
-#define AUDIO_BUFFER_SIZE   NUM_CHUNKS*CHUNK_SIZE
 
 /* #define DITHER_FLAG     (paDitherOff) */
 #define DITHER_FLAG     (0) /**/
@@ -57,12 +56,12 @@ typedef unsigned char SAMPLE;
 
 //just to create a timeout and switch
 #if __USE_BOOST__
-	boost::mutex g_full_or_empty_mx;
-	boost::condition_variable_any g_full_or_empty_cv;
+#define NS boost
 #else
-	std::mutex g_full_or_empty_mx;
-	std::condition_variable_any g_full_or_empty_cv;
+#define NS std
 #endif
+NS::mutex g_full_or_empty_mx;
+NS::condition_variable_any g_full_or_empty_cv;
 bool g_proceed;
 
 
@@ -119,7 +118,10 @@ static int recordCallback( const void *inputBuffer, void *outputBuffer,
         memcpy(destination_chunk, rptr, CHUNK_SIZE);
     }
     else
+    {
         syslog(LOG_ALERT, "Ran out of destination chunks!");
+	return paContinue;
+    }
 
     g_audio_samples_ring.push(destination_chunk);
     if(was_empty)
@@ -161,7 +163,14 @@ int main(void)
             printf("Named pipe %s already exists.\n", path);
         }
 
+	printf("\nSample Rate: %d\n", SAMPLE_RATE);
+	printf("Frames per buffer: %d\n", FRAMES_PER_BUFFER);
+	printf("Chunk size: %lu\n", CHUNK_SIZE);
+	printf("Size of sample in bytes: %ld\n", sizeof(SAMPLE));
+	printf("Number of samples per frame (a.k.a, # of channels): %d\n", NUM_CHANNELS);
+
         printf("Waiting for reader to open %s\n", path);
+
         int fifo = open(path, O_WRONLY);
         if( fifo == -1 )
         {
@@ -225,7 +234,11 @@ int main(void)
             {
                 write_return_value = write(fifo, fresh_samples, CHUNK_SIZE);
                 if(!g_recycled_buffers_ring.push(fresh_samples))
-                    syslog(LOG_ALERT, "Recycle ring is full");
+		{
+                    syslog(LOG_ALERT, "Recycle ring is full. Detected mismatched sizes between recycle_buffer and audio_sample buffer.");
+		    break;
+		}
+
                 if(write_return_value == -1)
                 {
                     break;
