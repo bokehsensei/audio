@@ -1,0 +1,1 @@
+clang++ -g3 --stdlib=libc++ sound.cpp -I /opt/local/include -L /opt/local/lib -lportaudio -o sound
