@@ -1,7 +1,6 @@
 import matplotlib
 matplotlib.use('TkAgg') # do this before importing pylab
 import matplotlib.pyplot as plt
-import random
 import struct
 
 time_window = 90000 # samples
@@ -27,6 +26,7 @@ def animate(*args):
 			data.append(struct.unpack('f',microphone.read(4))[0])
 		n += 1
 		line.set_data(range(n-slide, n), data[-slide:])
+		ax.autoscale_view()
 		ax.set_xlim(n-(slide+1), n-1)
 		fig.canvas.draw()
 
