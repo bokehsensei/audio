@@ -2,10 +2,16 @@
 #include <stdlib.h>
 #include <portaudio.h>
 #include <signal.h>
-#include <boost/thread.hpp>
+#if __USE_BOOST__
+	#include <boost/thread.hpp>
+#else
+	#include <thread>
+	#include <condition_variable>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 #include <syslog.h>
 
@@ -50,8 +56,13 @@ typedef unsigned char SAMPLE;
 #endif
 
 //just to create a timeout and switch
-boost::mutex g_full_or_empty_mx;
-boost::condition_variable_any g_full_or_empty_cv;
+#if __USE_BOOST__
+	boost::mutex g_full_or_empty_mx;
+	boost::condition_variable_any g_full_or_empty_cv;
+#else
+	std::mutex g_full_or_empty_mx;
+	std::condition_variable_any g_full_or_empty_cv;
+#endif
 bool g_proceed;
 
 
