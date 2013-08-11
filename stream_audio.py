@@ -3,6 +3,7 @@ matplotlib.use('TkAgg') # do this before importing pylab
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import struct
+import sys
 
 slide = 4*1024 # samples
 #slide_ms = 1000*slide / 44100
@@ -31,6 +32,6 @@ def update_plot(new_sound_samples, samples):
 fig = plt.figure()
 ax = fig.add_subplot(111)
 line, = ax.plot(samples)
-ani = animation.FuncAnimation(fig, update_plot, read_more_sound_samples, interval=slide_ms, fargs = (samples,))
+ani = animation.FuncAnimation(fig, update_plot, read_more_sound_samples, interval=0, fargs = (samples,), blit=True)
 plt.show()
 microphone.close()
