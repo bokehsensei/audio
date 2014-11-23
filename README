@@ -1,7 +1,13 @@
-Sound captures audio samples and writes them to a fifo (default path: /tmp/microphone)
+Sound captures audio samples and writes them to a FIFO file (default path: /tmp/microphone)
 Internally, uses a lockfree ring buffer, written in C, and the portaudio library to talk to the sound card.
 
-2 scripts make use of the FIFO (/tmp/microphone):
+2 scripts make use of the FIFO file (/tmp/microphone):
 plot, which captures samples and displays them using GnuPlo
 stream_audio.py, which does the same in streaming fashion using matplotlib
+
+Usage:
+
+1/ launch ./sound
+2/ ls /tmp/microphone  [ to make sure it's working ]
+3/ ./plot or ./stream_audio.py
 
